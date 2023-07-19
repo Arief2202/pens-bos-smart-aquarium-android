@@ -5,6 +5,12 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pens_bos_smart_aquarium/global_variables.dart' as globals;
+import 'package:pens_bos_smart_aquarium/manajemen_air.dart';
+import 'package:pens_bos_smart_aquarium/cctv.dart';
+import 'package:pens_bos_smart_aquarium/jadwal_pakan.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' show jsonDecode;
+import 'dart:async';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -14,8 +20,38 @@ class Dashboard extends StatefulWidget {
 }
 
 class DashboardState extends State<Dashboard> {
+  Timer? timer;
+  String suhu_air = "0";
+  String suhu_ruangan = "0";
+  String ph_air = "0";
+  String kekeruhan_air = "0";
+
+  @override
   void initState() {
+    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateValue());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  void updateValue() async {
+    var url = Uri.parse("http://bos-smarts.eepis.tech/");
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var respon = jsonDecode(response.body);
+      print(respon['data_latest']['suhu_air']);
+      setState(() {
+        suhu_air = respon['data_latest']['suhu_air'];
+        suhu_ruangan = respon['data_latest']['suhu_ruangan'];
+        ph_air = respon['data_latest']['ph_air'];
+        kekeruhan_air = respon['data_latest']['kekeruhan_air'];
+        // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
+      });
+    }
   }
 
   Widget build(BuildContext context) {
@@ -120,19 +156,19 @@ class DashboardState extends State<Dashboard> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "25",
+                        suhu_ruangan,
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        "25",
+                        suhu_air,
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        "8",
+                        ph_air,
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        "25",
+                        kekeruhan_air,
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                     ],
@@ -169,9 +205,9 @@ class DashboardState extends State<Dashboard> {
             child: ElevatedButton(
               child: new Text("CCTV Aquarium"),
               onPressed: () {
-                // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                //   // return MonitoringPage();
-                // }));
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return CCTV();
+                }));
               },
             ),
           ),
@@ -182,9 +218,9 @@ class DashboardState extends State<Dashboard> {
             child: ElevatedButton(
               child: new Text("Jadwal Pakan"),
               onPressed: () {
-                // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                //   return ListKaryawan();
-                // }));
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return JadwalPakan();
+                }));
               },
             ),
           ),
@@ -195,9 +231,9 @@ class DashboardState extends State<Dashboard> {
             child: ElevatedButton(
               child: new Text("Manajemen Air"),
               onPressed: () {
-                // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                //   return ListKaryawan();
-                // }));
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return ManajemenAir();
+                }));
               },
             ),
           ),
