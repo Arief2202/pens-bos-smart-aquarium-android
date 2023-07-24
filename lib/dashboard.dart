@@ -11,6 +11,7 @@ import 'package:pens_bos_smart_aquarium/jadwal_pakan.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show jsonDecode;
 import 'dart:async';
+import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -25,6 +26,8 @@ class DashboardState extends State<Dashboard> {
   String suhu_ruangan = "0";
   String ph_air = "0";
   String kekeruhan_air = "0";
+  String timestamp = "0";
+  DateTime tempDate = DateTime(2023,7,24,7,0,0);
 
   @override
   void initState() {
@@ -43,14 +46,24 @@ class DashboardState extends State<Dashboard> {
     var response = await http.get(url);
     if (response.statusCode == 200) {
       var respon = jsonDecode(response.body);
-      print(respon['data_latest']['suhu_air']);
-      setState(() {
-        suhu_air = respon['data_latest']['suhu_air'];
-        suhu_ruangan = respon['data_latest']['suhu_ruangan'];
-        ph_air = respon['data_latest']['ph_air'];
-        kekeruhan_air = respon['data_latest']['kekeruhan_air'];
-        // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
-      });
+      if (this.mounted) {
+        setState(() {
+          suhu_air = respon['data_latest']['suhu_air'];
+          suhu_ruangan = respon['data_latest']['suhu_ruangan'];
+          ph_air = respon['data_latest']['ph_air'];
+          kekeruhan_air = respon['data_latest']['kekeruhan_air'];
+          timestamp = respon['data_latest']['timestamp'];
+          tempDate = new DateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
+          
+          globals.data = List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+
+          globals.statePengisi = respon['state_latest']['pengisi_air'] == "1" ? true : false;
+          globals.stateC1 = respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+          globals.stateC2 = respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+          globals.stateLampu = respon['state_latest']['lampu'] == "1" ? true : false;
+          // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
+        });
+      }
     }
   }
 
@@ -130,6 +143,22 @@ class DashboardState extends State<Dashboard> {
                         "Tingkat Kekeruhan ",
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "Timestamp",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "Tanggal ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        "Jam ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                   Column(
@@ -140,6 +169,22 @@ class DashboardState extends State<Dashboard> {
                       ),
                       Text(
                         " :  ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        " :  ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        " :  ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        " ",
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
                       Text(
@@ -171,6 +216,22 @@ class DashboardState extends State<Dashboard> {
                         kekeruhan_air,
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        DateFormat('dd MMM yyyy').format(tempDate!),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        DateFormat('hh:mm:ss').format(tempDate!),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
                     ],
                   ),
                   Column(
@@ -189,7 +250,23 @@ class DashboardState extends State<Dashboard> {
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        " NTU",
+                        "   NTU",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        " ",
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                      ),
+                      Text(
+                        DateFormat('a').format(tempDate!),
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                     ],
@@ -242,8 +319,11 @@ class DashboardState extends State<Dashboard> {
             height: 50.0,
             width: MediaQuery.of(context).size.width - 50,
             child: ElevatedButton(
-              child: new Text("Lampu LED"),
-              onPressed: () {
+              child: new Text("Lampu LED  (${globals.stateLampu ? "ON" : "OFF"})"),
+              onPressed: () async{            
+                var url = Uri.parse(globals.endpoint_change_state);
+                final response = await http.post(url, body: {'column': 'lampu', 'state': '${globals.stateLampu ? "0" : "1"}'});
+                print(response.statusCode);
                 // Navigator.push(context, MaterialPageRoute(builder: (context) {
                 //   return ListKaryawan();
                 // }));

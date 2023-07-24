@@ -5,6 +5,9 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pens_bos_smart_aquarium/global_variables.dart' as globals;
+import 'dart:async';
+import 'dart:convert' show jsonDecode;
+import 'package:http/http.dart' as http;
 
 class ManajemenAir extends StatefulWidget {
   const ManajemenAir({super.key});
@@ -13,9 +16,37 @@ class ManajemenAir extends StatefulWidget {
   State<ManajemenAir> createState() => ManajemenAirState();
 }
 
-class ManajemenAirState extends State<ManajemenAir> {
+class ManajemenAirState extends State<ManajemenAir> {  
+  Timer? timer;
+  
+  @override
   void initState() {
+    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateValue());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  void updateValue() async {
+    var url = Uri.parse("http://bos-smarts.eepis.tech/");
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var respon = jsonDecode(response.body);
+      if (this.mounted) {
+        setState(() {        
+          globals.data = List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+          globals.statePengisi = respon['state_latest']['pengisi_air'] == "1" ? true : false;
+          globals.stateC1 = respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+          globals.stateC2 = respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+          globals.stateLampu = respon['state_latest']['lampu'] == "1" ? true : false;
+          // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
+        });
+      }
+    }
   }
 
   Widget build(BuildContext context) {
@@ -27,41 +58,6 @@ class ManajemenAirState extends State<ManajemenAir> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text("Manajemen Air"),
-        // actions: <Widget>[
-        //   IconButton(
-        //       icon: const Icon(Icons.logout),
-        //       onPressed: () async {
-        //         Alert(
-        //           context: context,
-        //           type: AlertType.warning,
-        //           desc: "\nDo you want to Logout ?",
-        //           buttons: [
-        //             DialogButton(
-        //                 child: Text(
-        //                   "No",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () {
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //             DialogButton(
-        //                 child: Text(
-        //                   "Yes",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () async {
-        //                   final prefs = await SharedPreferences.getInstance();
-        //                   await prefs.remove('username');
-        //                   await prefs.remove('password');
-        //                   setState(() {
-        //                     globals.isLoggedIn = false;
-        //                   });
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //           ],
-        //         ).show();
-        //       })
-        // ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -74,8 +70,11 @@ class ManajemenAirState extends State<ManajemenAir> {
             height: 50.0,
             width: MediaQuery.of(context).size.width - 50,
             child: ElevatedButton(
-              child: new Text("On/Off Valve Pengisi Air"),
-              onPressed: () {
+              child: new Text("On/Off Valve Pengisi Air (${globals.statePengisi ? "ON" : "OFF"})"),
+              onPressed: ()  async{            
+                var url = Uri.parse(globals.endpoint_change_state);
+                final response = await http.post(url, body: {'column': 'pengisi_air', 'state': '${globals.statePengisi ? "0" : "1"}'});
+                print(response.statusCode);
                 // Navigator.push(context, MaterialPageRoute(builder: (context) {
                 //   // return MonitoringPage();
                 // }));
@@ -89,8 +88,11 @@ class ManajemenAirState extends State<ManajemenAir> {
             height: 50.0,
             width: MediaQuery.of(context).size.width - 50,
             child: ElevatedButton(
-              child: new Text("On/Off Valve Pembuang C1"),
-              onPressed: () {
+              child: new Text("On/Off Valve Pembuang C1 (${globals.stateC1 ? "ON" : "OFF"})"),
+              onPressed: ()  async{            
+                var url = Uri.parse(globals.endpoint_change_state);
+                final response = await http.post(url, body: {'column': 'pembuang_c1', 'state': '${globals.stateC1 ? "0" : "1"}'});
+                print(response.statusCode);
                 // Navigator.push(context, MaterialPageRoute(builder: (context) {
                 //   return ListKaryawan();
                 // }));
@@ -102,8 +104,11 @@ class ManajemenAirState extends State<ManajemenAir> {
             height: 50.0,
             width: MediaQuery.of(context).size.width - 50,
             child: ElevatedButton(
-              child: new Text("On/Off Valve Pembuang C2"),
-              onPressed: () {
+              child: new Text("On/Off Valve Pembuang C2 (${globals.stateC2 ? "ON" : "OFF"})"),
+              onPressed: ()  async{            
+                var url = Uri.parse(globals.endpoint_change_state);
+                final response = await http.post(url, body: {'column': 'pembuang_c2', 'state': '${globals.stateC2 ? "0" : "1"}'});
+                print(response.statusCode);
                 // Navigator.push(context, MaterialPageRoute(builder: (context) {
                 //   return ListKaryawan();
                 // }));

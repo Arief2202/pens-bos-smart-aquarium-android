@@ -33,7 +33,7 @@ class LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                  Image.asset("img/logo.png", width: MediaQuery.of(context).size.width / 1.4),
+                  Image.asset("assets/img/logo.png", width: MediaQuery.of(context).size.width / 1.4),
                   Container(
                     width: MediaQuery.of(context).size.width - 25,
                     // height: 330,

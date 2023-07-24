@@ -8,6 +8,21 @@ import 'package:pens_bos_smart_aquarium/global_variables.dart' as globals;
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'dart:developer';
 import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:convert' show jsonDecode;
+import 'package:http/http.dart' as http;
+
+const List<String> list = <String>[
+  'Senin',
+  'Selasa',
+  'Rabu',
+  'Kamis',
+  'Jumat',
+  'Sabtu',
+  'Minggu'
+];
+var hari = list.first;
+var jam = "";
 
 class JadwalPakan extends StatefulWidget {
   const JadwalPakan({super.key});
@@ -17,8 +32,37 @@ class JadwalPakan extends StatefulWidget {
 }
 
 class JadwalPakanState extends State<JadwalPakan> {
+  Timer? timer;
+  TextEditingController timeinput = TextEditingController();
+  
+  @override
   void initState() {
+    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateValue());
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  void updateValue() async {
+    var url = Uri.parse("http://bos-smarts.eepis.tech/");
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      var respon = jsonDecode(response.body);
+      if (this.mounted) {
+        setState(() {        
+          globals.data = List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+          globals.statePengisi = respon['state_latest']['pengisi_air'] == "1" ? true : false;
+          globals.stateC1 = respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+          globals.stateC2 = respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+          globals.stateLampu = respon['state_latest']['lampu'] == "1" ? true : false;
+          // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
+        });
+      }
+    }
   }
 
   Widget build(BuildContext context) {
@@ -30,41 +74,6 @@ class JadwalPakanState extends State<JadwalPakan> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text("Jadwal Pakan"),
-        // actions: <Widget>[
-        //   IconButton(
-        //       icon: const Icon(Icons.logout),
-        //       onPressed: () async {
-        //         Alert(
-        //           context: context,
-        //           type: AlertType.warning,
-        //           desc: "\nDo you want to Logout ?",
-        //           buttons: [
-        //             DialogButton(
-        //                 child: Text(
-        //                   "No",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () {
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //             DialogButton(
-        //                 child: Text(
-        //                   "Yes",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () async {
-        //                   final prefs = await SharedPreferences.getInstance();
-        //                   await prefs.remove('username');
-        //                   await prefs.remove('password');
-        //                   setState(() {
-        //                     globals.isLoggedIn = false;
-        //                   });
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //           ],
-        //         ).show();
-        //       })
-        // ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -78,6 +87,68 @@ class JadwalPakanState extends State<JadwalPakan> {
             child: ElevatedButton(
               child: new Text("Tambahkan Data"),
               onPressed: () {
+                Alert(
+                    context: context,
+                    title: "Tambahkan Jadwal",
+                    content: Column(
+                      children: <Widget>[
+                        DropdownButtonExample(),
+                        TextField(
+                          controller:
+                              timeinput, //editing controller of this TextField
+                          decoration: InputDecoration(
+                              icon: Icon(Icons.timer), //icon of text field
+                              labelText: "Enter Time" //label text of field
+                              ),
+                          readOnly:
+                              true, //set it true, so that user will not able to edit text
+                          onTap: () async {
+                            TimeOfDay? pickedTime = await showTimePicker(
+                              initialTime: TimeOfDay.now(),
+                              context: context,
+                            );
+
+                            if (pickedTime != null) {
+                              print(
+                                  pickedTime.format(context)); //output 10:51 PM
+                              DateTime parsedTime = new DateFormat("hh:mm a")
+                                  .parse(pickedTime.format(context).toString());
+                              // //converting to DateTime so that we can further format on different pattern.
+                              // print(parsedTime); //output 1970-01-01 22:53:00.000
+                              String formattedTime =
+                                  DateFormat('HH:mm:ss').format(parsedTime);
+                              // print(formattedTime); //output 14:59:00
+                              // //DateFormat() is from intl package, you can format the time on any pattern you need.
+
+                              setState(() {
+                                timeinput.text =
+                                    formattedTime; //set the value of text field.
+                                jam = formattedTime;
+                              });
+                            } else {
+                              print("Time is not selected");
+                            }
+                          },
+                        )
+                      ],
+                    ),
+                    buttons: [
+                      DialogButton(
+                        onPressed: () async{
+                          var url = Uri.parse(globals.endpoint_create_jadwal);
+                          final response = await http.post(url, body: {'hari': hari, 'jam': jam});
+                          print(hari);
+                          print(jam);
+                          print(response.statusCode);
+                          // context.loaderOverlay.hide();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Tambahkan",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      )
+                    ]).show();
                 // Navigator.push(context, MaterialPageRoute(builder: (context) {
                 //   return AbsensiPage(id: 1);
                 // }));
@@ -87,61 +158,92 @@ class JadwalPakanState extends State<JadwalPakan> {
 
           Container(height: 20.0), //SizedBox(height: 20.0),
           SingleChildScrollView(
+              // scrollDirection: Axis.vertical,
               child: Stack(children: <Widget>[
-            Column(children: [
-              SizedBox(
-                width: double.infinity,
-                child: DataTable(
-                  columns: const <DataColumn>[
-                    DataColumn(
-                      label: Text('Jam Pakan'),
-                    ),
-                    // DataColumn(
-                    //   label: Text('Name'),
-                    // ),
-                    // DataColumn(
-                    //   label: Text('Aksi'),
-                    // ),
-                    // DataColumn(
-                    //   label: Text('Pesan'),
-                    // ),
-                    DataColumn(
-                      label: Text('Timestamp'),
-                    ),
-                  ],
-                  rows: List.generate(5, (index) {
-                    // final item = filteredDataSearch![index];
-                    return DataRow(
-                      cells: [
-                        DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                        DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                        // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                        // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                        // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                Column(children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: DataTable(
+                      columns: const <DataColumn>[
+                        DataColumn(
+                          label: Text('Hari'),
+                        ),
+                        // DataColumn(
+                        //   label: Text('Name'),
+                        // ),
+                        // DataColumn(
+                        //   label: Text('Pesan'),
+                        // ),
+                        DataColumn(
+                          label: Text('Jam'),
+                        ),
+                        DataColumn(
+                          label: Text('Aksi'),
+                        ),
                       ],
-                    );
-                  }),
-                ),
-              ),
-            ])
-          ]))
-
-          // Container(height: 20.0), //SizedBox(height: 20.0),
-
-          // Container(
-          //   height: 50.0,
-          //   width: 300.0,
-          //   child: ElevatedButton(
-          //     child: new Text("History Presensi"),
-          //     onPressed: () {
-          //       Navigator.push(context, MaterialPageRoute(builder: (context) {
-          //         return HistoryPresensiPage();
-          //       }));
-          //     },
-          //   ),
-          // ),
+                      rows: List.generate(globals.data!.length, (index) {
+                        final item = globals.data![index];
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(item['hari'],
+                                style: TextStyle(color: Colors.black))),
+                            DataCell(Text(item['jam'],
+                                style: TextStyle(color: Colors.black))),
+                            DataCell(ElevatedButton(
+                                child: new Text("Hapus"), onPressed: () async{                                  
+                                  var url = Uri.parse(globals.endpoint_delete_jadwal);
+                                  final response = await http.post(url, body: {'id': item['id']});
+                                })),
+                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ])
+              ]))
         ],
       ),
+    );
+  }
+}
+
+class DropdownButtonExample extends StatefulWidget {
+  const DropdownButtonExample({super.key});
+
+  @override
+  State<DropdownButtonExample> createState() => _DropdownButtonExampleState();
+}
+
+class _DropdownButtonExampleState extends State<DropdownButtonExample> {
+  String dropdownValue = list.first;
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      value: dropdownValue,
+      isExpanded: true,
+      icon: const Icon(Icons.arrow_downward),
+      elevation: 16,
+      style: const TextStyle(color: globals.baseColor),
+      underline: Container(
+        height: 2,
+        color: globals.baseColor,
+      ),
+      onChanged: (String? value) {
+        // This is called when the user selects an item.
+        setState(() {
+          dropdownValue = value!;
+          hari = dropdownValue;
+        });
+      },
+      items: list.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
     );
   }
 }
