@@ -225,11 +225,11 @@ class DashboardState extends State<Dashboard> {
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        DateFormat('dd MMM yyyy').format(tempDate!),
+                        DateFormat('dd MMM yyyy').format(tempDate),
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        DateFormat('hh:mm:ss').format(tempDate!),
+                        DateFormat('hh:mm:ss').format(tempDate),
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                     ],
@@ -266,7 +266,7 @@ class DashboardState extends State<Dashboard> {
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                       Text(
-                        DateFormat('a').format(tempDate!),
+                        DateFormat('a').format(tempDate),
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
                       ),
                     ],

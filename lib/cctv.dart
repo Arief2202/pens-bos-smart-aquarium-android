@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:pens_bos_smart_aquarium/global_variables.dart' as globals;
 
 class CCTV extends StatefulWidget {
@@ -14,59 +15,106 @@ class CCTV extends StatefulWidget {
 }
 
 class CCTVState extends State<CCTV> {
+  TextEditingController link = TextEditingController();
+  bool _isScreenOn = false;
+
   void initState() {
     super.initState();
+    WebView.platform = AndroidWebView();
+    // loadLink();
+  }
+  void loadLink() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (this.mounted) {
+      setState(() {
+        link.text = prefs.getString('camLink')!;
+      });
+    }
   }
 
   Widget build(BuildContext context) {
     double mapWidth = MediaQuery.of(context).size.width / 1.2;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text("Monitor CCTV"),
-        // actions: <Widget>[
-        //   IconButton(
-        //       icon: const Icon(Icons.logout),
-        //       onPressed: () async {
-        //         Alert(
-        //           context: context,
-        //           type: AlertType.warning,
-        //           desc: "\nDo you want to Logout ?",
-        //           buttons: [
-        //             DialogButton(
-        //                 child: Text(
-        //                   "No",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () {
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //             DialogButton(
-        //                 child: Text(
-        //                   "Yes",
-        //                   style: TextStyle(color: Colors.white, fontSize: 20),
-        //                 ),
-        //                 onPressed: () async {
-        //                   final prefs = await SharedPreferences.getInstance();
-        //                   await prefs.remove('username');
-        //                   await prefs.remove('password');
-        //                   setState(() {
-        //                     globals.isLoggedIn = false;
-        //                   });
-        //                   Phoenix.rebirth(context);
-        //                 }),
-        //           ],
-        //         ).show();
-        //       })
-        // ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          SizedBox(height: 20),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Link Webcam',
+                    labelStyle: TextStyle(fontSize: 20),
+                    // errorText: _error[0] ? 'Value Can\'t Be Empty' : null,
+                  ),
+                  onSubmitted: (value) async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('camLink', link.text);
+                  },
+                  controller: link,
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 15),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20),
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: () async{
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('camLink', link.text);
+                if (this.mounted) {
+                  setState(() {
+                    if(_isScreenOn) _isScreenOn = false;
+                    else _isScreenOn = true;
+                  });
+                }
+              },
+              child: Text(
+                _isScreenOn ? "Stop" : "Start",
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ),
+          SizedBox(height: 15),          
+          _isScreenOn
+            ? Container(
+                height: 400,
+                width: MediaQuery.of(context).size.width,
+                child: WebView(
+                  initialUrl: link.text,
+                ))
+            : Container(
+                height: 400,
+                width: MediaQuery.of(context).size.width,
+              )
+
+          // _isScreenOn
+          //   ? Container(
+          //       height: 240,
+          //       width: 320,
+          //       child: WebView(
+          //         initialUrl: "http://192.168.225.97",
+          //       ))
+          //   : Container(
+          //       height: 240,
+          //       width: 320,
+          //     ));
           // Container(height: 20.0), //SizedBox(height: 20.0),
 
           // Container(
