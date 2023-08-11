@@ -1,4 +1,4 @@
-// ignore_for_file: curly_braces_in_flow_control_structures, prefer_const_constructors, sort_child_properties_last, unused_local_variable, unused_import
+// ignore_for_file: curly_braces_in_flow_control_structures, prefer_const_constructors, sort_child_properties_last, unused_local_variable, unused_import, must_be_immutable
 
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -27,7 +27,7 @@ class DashboardState extends State<Dashboard> {
   String ph_air = "0";
   String kekeruhan_air = "0";
   String timestamp = "0";
-  DateTime tempDate = DateTime(2023,7,24,7,0,0);
+  DateTime tempDate = DateTime(2023, 7, 24, 7, 0, 0);
 
   @override
   void initState() {
@@ -54,13 +54,18 @@ class DashboardState extends State<Dashboard> {
           kekeruhan_air = respon['data_latest']['kekeruhan_air'];
           timestamp = respon['data_latest']['timestamp'];
           tempDate = new DateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
-          
-          globals.data = List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
 
-          globals.statePengisi = respon['state_latest']['pengisi_air'] == "1" ? true : false;
-          globals.stateC1 = respon['state_latest']['pembuang_c1'] == "1" ? true : false;
-          globals.stateC2 = respon['state_latest']['pembuang_c2'] == "1" ? true : false;
-          globals.stateLampu = respon['state_latest']['lampu'] == "1" ? true : false;
+          globals.data =
+              List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+
+          globals.statePengisi =
+              respon['state_latest']['pengisi_air'] == "1" ? true : false;
+          globals.stateC1 =
+              respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+          globals.stateC2 =
+              respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+          globals.stateLampu =
+              respon['state_latest']['lampu'] == "1" ? true : false;
           // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
         });
       }
@@ -129,35 +134,43 @@ class DashboardState extends State<Dashboard> {
                     children: [
                       Text(
                         "Suhu Ruangan ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Temperatur Air ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Tingkat PH Air ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Tingkat Kekeruhan ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Timestamp",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Tanggal ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         "Jam ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -165,35 +178,43 @@ class DashboardState extends State<Dashboard> {
                     children: [
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                       Text(
                         " :  ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -202,35 +223,59 @@ class DashboardState extends State<Dashboard> {
                     children: [
                       Text(
                         suhu_ruangan,
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         suhu_air,
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         ph_air,
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         kekeruhan_air,
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         DateFormat('dd MMM yyyy').format(tempDate),
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         DateFormat('hh:mm:ss').format(tempDate),
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                     ],
                   ),
@@ -239,35 +284,59 @@ class DashboardState extends State<Dashboard> {
                     children: [
                       Text(
                         " °C",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " °C",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " pH",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         "   NTU",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         " ",
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                       Text(
                         DateFormat('a').format(tempDate),
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: globals.valueColor),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: globals.valueColor),
                       ),
                     ],
                   ),
@@ -276,91 +345,108 @@ class DashboardState extends State<Dashboard> {
             ),
           ),
           Container(height: 20.0), //SizedBox(height: 20.0),
-          Container(
-            height: 50.0,
-            width: MediaQuery.of(context).size.width - 50,
-            child: ElevatedButton(
-              child: new Text("CCTV Aquarium"),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return CCTV();
-                }));
-              },
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ImageButton(
+                image: 'assets/img/valve_dark.png',
+                title: 'Manajemen Air',
+                margin: EdgeInsets.only(right: 40),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ManajemenAir();
+                  }));
+                },
+              ),
+              ImageButton(
+                image: 'assets/img/feed_dark.png',
+                title: 'Jadwal Pakan',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return JadwalPakan();
+                  }));
+                },
+              ),
+            ],
           ),
-          Container(height: 15.0), //SizedBox(height: 20.0),
-          Container(
-            height: 50.0,
-            width: MediaQuery.of(context).size.width - 50,
-            child: ElevatedButton(
-              child: new Text("Jadwal Pakan"),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return JadwalPakan();
-                }));
-              },
-            ),
+          Container(height: 20.0), //SizedBox(height: 20.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ImageButton(
+                image: 'assets/img/cctv_dark.png',
+                title: 'CCTV Aquarium',
+                margin: EdgeInsets.only(right: 40),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CCTV();
+                  }));
+                },
+              ),
+              ImageButton(
+                image: "assets/img/lamp_${globals.stateLampu ? "on" : "off"}_dark.png",
+                title: 'Lampu',
+                onTap:  () async {
+                    var url = Uri.parse(globals.endpoint_change_state);
+                    final response = await http.post(url, body: {
+                      'column': 'lampu',
+                      'state': '${globals.stateLampu ? "0" : "1"}'
+                    });
+                    print(response.statusCode);
+                }
+              ),
+            ],
           ),
-          Container(height: 15.0), //SizedBox(height: 20.0),
-          Container(
-            height: 50.0,
-            width: MediaQuery.of(context).size.width - 50,
-            child: ElevatedButton(
-              child: new Text("Manajemen Air"),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return ManajemenAir();
-                }));
-              },
-            ),
-          ),
-          Container(height: 15.0), //SizedBox(height: 20.0),
-          Container(
-            height: 50.0,
-            width: MediaQuery.of(context).size.width - 50,
-            child: ElevatedButton(
-              child: new Text("Lampu LED  (${globals.stateLampu ? "ON" : "OFF"})"),
-              onPressed: () async{            
-                var url = Uri.parse(globals.endpoint_change_state);
-                final response = await http.post(url, body: {'column': 'lampu', 'state': '${globals.stateLampu ? "0" : "1"}'});
-                print(response.statusCode);
-                // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                //   return ListKaryawan();
-                // }));
-              },
-            ),
-          ),
-
-          // Container(height: 20.0), //SizedBox(height: 20.0),
-
-          // Container(
-          //   height: 50.0,
-          //   width: 300.0,
-          //   child: ElevatedButton(
-          //     child: new Text("History Lokasi"),
-          //     onPressed: () {
-          //       Navigator.push(context, MaterialPageRoute(builder: (context) {
-          //         return AbsensiPage(id: 1);
-          //       }));
-          //     },
-          //   ),
-          // ),
-
-          // Container(height: 20.0), //SizedBox(height: 20.0),
-
-          // Container(
-          //   height: 50.0,
-          //   width: 300.0,
-          //   child: ElevatedButton(
-          //     child: new Text("History Presensi"),
-          //     onPressed: () {
-          //       Navigator.push(context, MaterialPageRoute(builder: (context) {
-          //         return HistoryPresensiPage();
-          //       }));
-          //     },
-          //   ),
-          // ),
         ],
+      ),
+    );
+  }
+}
+
+class ImageButton extends StatelessWidget {
+  String image;
+  String title;
+  VoidCallback onTap;
+  EdgeInsets? margin;
+  ImageButton(
+      {required this.image,
+      required this.title,
+      required this.onTap,
+      this.margin,
+      super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // height: 120.0,
+      width: 150,
+      margin: margin,
+      decoration: BoxDecoration(color: globals.baseColor),
+      child: Material(
+        color: globals.baseColor,
+        child: InkWell(
+          splashColor: globals.baseColor,
+          onTap: onTap,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(height: 20.0),
+              Image.asset(image, width: 100, height: 100),
+              // Ink.image(
+              //   image: AssetImage(image),
+              //   width: 90,
+              //   height: 90,
+              //   // fit: BoxFit.cover,
+              // ),
+              Container(height: 20.0),
+              Text(
+                title,
+                style: TextStyle(color: Colors.white),
+              ),
+              Container(height: 10.0),
+            ],
+          ),
+        ),
       ),
     );
   }

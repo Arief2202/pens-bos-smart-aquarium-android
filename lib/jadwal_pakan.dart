@@ -85,7 +85,7 @@ class JadwalPakanState extends State<JadwalPakan> {
             height: 50.0,
             width: 300.0,
             child: ElevatedButton(
-              child: new Text("Tambahkan Data"),
+              child: new Text("Tambahkan Jadwal"),
               onPressed: () {
                 Alert(
                     context: context,
@@ -111,7 +111,7 @@ class JadwalPakanState extends State<JadwalPakan> {
                             if (pickedTime != null) {
                               print(
                                   pickedTime.format(context)); //output 10:51 PM
-                              DateTime parsedTime = new DateFormat("hh:mm a")
+                              DateTime parsedTime = new DateFormat("hh:mm")
                                   .parse(pickedTime.format(context).toString());
                               // //converting to DateTime so that we can further format on different pattern.
                               // print(parsedTime); //output 1970-01-01 22:53:00.000
@@ -157,53 +157,56 @@ class JadwalPakanState extends State<JadwalPakan> {
           ),
 
           Container(height: 20.0), //SizedBox(height: 20.0),
-          SingleChildScrollView(
-              // scrollDirection: Axis.vertical,
-              child: Stack(children: <Widget>[
-                Column(children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: DataTable(
-                      columns: const <DataColumn>[
-                        DataColumn(
-                          label: Text('Hari'),
-                        ),
-                        // DataColumn(
-                        //   label: Text('Name'),
-                        // ),
-                        // DataColumn(
-                        //   label: Text('Pesan'),
-                        // ),
-                        DataColumn(
-                          label: Text('Jam'),
-                        ),
-                        DataColumn(
-                          label: Text('Aksi'),
-                        ),
-                      ],
-                      rows: List.generate(globals.data!.length, (index) {
-                        final item = globals.data![index];
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(item['hari'],
-                                style: TextStyle(color: Colors.black))),
-                            DataCell(Text(item['jam'],
-                                style: TextStyle(color: Colors.black))),
-                            DataCell(ElevatedButton(
-                                child: new Text("Hapus"), onPressed: () async{                                  
-                                  var url = Uri.parse(globals.endpoint_delete_jadwal);
-                                  final response = await http.post(url, body: {'id': item['id']});
-                                })),
-                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                            // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
-                          ],
-                        );
-                      }),
+          Container(
+            height: MediaQuery.of(context).size.height - 200,
+            child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Stack(children: <Widget>[
+                  Column(children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: DataTable(
+                        columns: const <DataColumn>[
+                          DataColumn(
+                            label: Text('Hari'),
+                          ),
+                          // DataColumn(
+                          //   label: Text('Name'),
+                          // ),
+                          // DataColumn(
+                          //   label: Text('Pesan'),
+                          // ),
+                          DataColumn(
+                            label: Text('Jam'),
+                          ),
+                          DataColumn(
+                            label: Text('Aksi'),
+                          ),
+                        ],
+                        rows: List.generate(globals.data!.length, (index) {
+                          final item = globals.data![index];
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(item['hari'],
+                                  style: TextStyle(color: Colors.black))),
+                              DataCell(Text(item['jam'],
+                                  style: TextStyle(color: Colors.black))),
+                              DataCell(ElevatedButton(
+                                  child: new Text("Hapus"), onPressed: () async{                                  
+                                    var url = Uri.parse(globals.endpoint_delete_jadwal);
+                                    final response = await http.post(url, body: {'id': item['id']});
+                                  })),
+                              // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                              // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                              // DataCell(Text("Dummy", style: TextStyle(color: Colors.black))),
+                            ],
+                          );
+                        }),
+                      ),
                     ),
-                  ),
-                ])
-              ]))
+                  ])
+                ])) ,
+          )
         ],
       ),
     );
