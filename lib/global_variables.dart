@@ -20,10 +20,11 @@ const baseColor = MaterialColor(0xff0B114B, <int, Color>{
   900: Color(0xff0B114B),
 });
 
-String endpoint = "http://bos-smarts.eepis.tech";
-String endpoint_create_jadwal = endpoint + "/jadwal_pakan/create.php";
-String endpoint_delete_jadwal = endpoint + "/jadwal_pakan/delete.php";
-String endpoint_change_state = endpoint + "/changeState.php";
+var responseCode = 404;
+String endpoint = "bos-smarts.eepis.tech";
+String endpoint_create_jadwal = "http://" + endpoint + "/jadwal_pakan/create.php";
+String endpoint_delete_jadwal = "http://" + endpoint + "/jadwal_pakan/delete.php";
+String endpoint_change_state = "http://" + endpoint + "/changeState.php";
 
 String username = "admin";
 String password = "admin";

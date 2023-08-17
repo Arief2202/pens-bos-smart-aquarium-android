@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'package:http/http.dart' as http;
+import 'package:pens_bos_smart_aquarium/class/Json.dart';
 
 const List<String> list = <String>[
   'Senin',
@@ -48,19 +49,42 @@ class JadwalPakanState extends State<JadwalPakan> {
   }
 
   void updateValue() async {
-    var url = Uri.parse("http://bos-smarts.eepis.tech/");
+    var url = Uri.parse("http://${globals.endpoint}/");
     var response = await http.get(url);
     if (response.statusCode == 200) {
-      var respon = jsonDecode(response.body);
-      if (this.mounted) {
-        setState(() {        
-          globals.data = List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
-          globals.statePengisi = respon['state_latest']['pengisi_air'] == "1" ? true : false;
-          globals.stateC1 = respon['state_latest']['pembuang_c1'] == "1" ? true : false;
-          globals.stateC2 = respon['state_latest']['pembuang_c2'] == "1" ? true : false;
-          globals.stateLampu = respon['state_latest']['lampu'] == "1" ? true : false;
-          // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
-        });
+      var respon = Json.tryDecode(response.body);
+      if(respon == null){
+        if (this.mounted) {
+          setState(() {
+              globals.statePengisi = false;
+              globals.stateC1 = false;
+              globals.stateC2 = false;
+              globals.stateLampu = false;
+              globals.data = null;
+          });
+        }
+      }
+      else{
+        if (this.mounted) {
+          setState(() {
+            if (respon['jadwal_pakan_flutter'] != null &&
+                respon['jadwal_pakan_flutter'] != "") {
+              globals.data =
+                  List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+            }
+
+            if (respon['state_latest'] != null && respon['state_latest'] != "") {
+              globals.statePengisi =
+                  respon['state_latest']['pengisi_air'] == "1" ? true : false;
+              globals.stateC1 =
+                  respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+              globals.stateC2 =
+                  respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+              globals.stateLampu =
+                  respon['state_latest']['lampu'] == "1" ? true : false;
+            }
+          });
+        }
       }
     }
   }
@@ -183,7 +207,7 @@ class JadwalPakanState extends State<JadwalPakan> {
                             label: Text('Aksi'),
                           ),
                         ],
-                        rows: List.generate(globals.data!.length, (index) {
+                        rows: List.generate(globals.data != null ? globals.data!.length : 0, (index) {
                           final item = globals.data![index];
                           return DataRow(
                             cells: [

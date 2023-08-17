@@ -17,9 +17,28 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  List<TextEditingController> _data = [TextEditingController(), TextEditingController()];
+  List<TextEditingController> _data = [TextEditingController(), TextEditingController(), TextEditingController()];
   List<bool> _error = [false, false, false, false];
   String _passwordMsg = "Value Can\'t Be Empty";
+
+  @override
+  void initState() {
+    super.initState();
+    loadEndpoint();
+  }
+
+  void loadEndpoint() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? endpoint = prefs.getString('endpoint');    
+    if(endpoint != null){      
+      if (this.mounted) {
+        setState(() {
+          _data[2].text = endpoint!;
+          globals.responseCode = 404;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +73,27 @@ class LoginPageState extends State<LoginPage> {
                                 // height: MediaQuery.of(context).size.width / 10,
                                 child: Text("LOGIN ADMIN", textAlign: TextAlign.center, style: TextStyle(color: globals.baseColor, fontSize: 30, fontWeight: FontWeight.bold))),
                             SizedBox(height: 20),
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextField(
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: 'Endpoint',
+                                      labelStyle: TextStyle(fontSize: 20),
+                                      errorText: _error[2] ? 'Value Can\'t Be Empty' : null,
+                                    ),
+                                    onSubmitted: (value) {
+                                      _doLogin(context);
+                                    },
+                                    controller: _data[2],
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 15),
                             Container(
                               margin: EdgeInsets.symmetric(horizontal: 20),
                               child: Column(
@@ -128,7 +168,7 @@ class LoginPageState extends State<LoginPage> {
     bool status = true;
     setState(() {
       _passwordMsg = "Value Can\'t Be Empty";
-      for (int a = 0; a < 2; a++) {
+      for (int a = 0; a < 3; a++) {
         if (_data[a].text.isEmpty) {
           _error[a] = true;
           status = false;
@@ -139,13 +179,17 @@ class LoginPageState extends State<LoginPage> {
     if (status) {
       String _username = _data[0].text;
       String _password = _data[1].text;
+      String _endpoint = _data[2].text;
 
       if (_username == globals.username && _password == globals.password) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('username', _username);
         await prefs.setString('password', _password);
+        await prefs.setString('endpoint', _endpoint);
         setState(() {
           globals.isLoggedIn = true;
+          globals.endpoint = _endpoint;
+          globals.responseCode = 404;
         });
         Alert(
           context: context,

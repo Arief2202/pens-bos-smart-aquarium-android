@@ -17,19 +17,35 @@ class CCTV extends StatefulWidget {
 class CCTVState extends State<CCTV> {
   TextEditingController link = TextEditingController();
   bool _isScreenOn = false;
-
+  @override
   void initState() {
     super.initState();
     WebView.platform = AndroidWebView();
-    // loadLink();
+    loadLink();
   }
   void loadLink() async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (this.mounted) {
-      setState(() {
-        link.text = prefs.getString('camLink')!;
-      });
+    final String? camLink = prefs.getString('camLink');
+    final bool? tempScreenOn = prefs.getBool('screenOn');
+    if(camLink != null && tempScreenOn != null){
+      if (this.mounted) {
+        setState(() {
+          link.text = camLink!;
+          _isScreenOn = tempScreenOn!;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    saveState();
+  }
+  void saveState() async{
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('camLink', link.text);
+    await prefs.setBool('screenOn', _isScreenOn);
   }
 
   Widget build(BuildContext context) {
@@ -39,7 +55,10 @@ class CCTVState extends State<CCTV> {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: (){
+            saveState();
+            Navigator.pop(context);
+          },
         ),
         title: Text("Monitor CCTV"),
       ),
@@ -75,15 +94,14 @@ class CCTVState extends State<CCTV> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: () async{
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('camLink', link.text);
+              onPressed: (){
                 if (this.mounted) {
                   setState(() {
                     if(_isScreenOn) _isScreenOn = false;
                     else _isScreenOn = true;
                   });
                 }
+                saveState();
               },
               child: Text(
                 _isScreenOn ? "Stop" : "Start",

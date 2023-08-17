@@ -8,8 +8,9 @@ import 'package:pens_bos_smart_aquarium/global_variables.dart' as globals;
 import 'package:pens_bos_smart_aquarium/manajemen_air.dart';
 import 'package:pens_bos_smart_aquarium/cctv.dart';
 import 'package:pens_bos_smart_aquarium/jadwal_pakan.dart';
+import 'package:pens_bos_smart_aquarium/class/Json.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert' show jsonDecode;
+import 'dart:convert';
 import 'dart:async';
 import 'package:intl/intl.dart';
 
@@ -31,7 +32,8 @@ class DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateValue());
+    timer =
+        Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateValue());
     super.initState();
   }
 
@@ -42,32 +44,56 @@ class DashboardState extends State<Dashboard> {
   }
 
   void updateValue() async {
-    var url = Uri.parse("http://bos-smarts.eepis.tech/");
+    var url = Uri.parse("http://${globals.endpoint}/");
     var response = await http.get(url);
+    if (this.mounted) {
+      setState(() {
+        globals.responseCode = response.statusCode;
+      });
+    }
+
     if (response.statusCode == 200) {
-      var respon = jsonDecode(response.body);
-      if (this.mounted) {
-        setState(() {
-          suhu_air = respon['data_latest']['suhu_air'];
-          suhu_ruangan = respon['data_latest']['suhu_ruangan'];
-          ph_air = respon['data_latest']['ph_air'];
-          kekeruhan_air = respon['data_latest']['kekeruhan_air'];
-          timestamp = respon['data_latest']['timestamp'];
-          tempDate = new DateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
-
-          globals.data =
-              List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
-
-          globals.statePengisi =
-              respon['state_latest']['pengisi_air'] == "1" ? true : false;
-          globals.stateC1 =
-              respon['state_latest']['pembuang_c1'] == "1" ? true : false;
-          globals.stateC2 =
-              respon['state_latest']['pembuang_c2'] == "1" ? true : false;
-          globals.stateLampu =
-              respon['state_latest']['lampu'] == "1" ? true : false;
-          // userLocation = List<UserLocation>.from((jsonDecode(response.body) as List).map((x) => UserLocation.fromJson(x)).where((content) => content.nuid != null));
+      var respon = Json.tryDecode(response.body);
+      if(respon == null){
+        if (this.mounted) {
+          setState(() {
+              suhu_air = " ";
+              suhu_ruangan = " ";
+              ph_air = " ";
+              kekeruhan_air = " ";
         });
+        }
+      }
+      else{
+        if (this.mounted) {
+          setState(() {
+            if (respon['data_latest'] != null && respon['data_latest'] != "") {
+              suhu_air = respon['data_latest']['suhu_air'];
+              suhu_ruangan = respon['data_latest']['suhu_ruangan'];
+              ph_air = respon['data_latest']['ph_air'];
+              kekeruhan_air = respon['data_latest']['kekeruhan_air'];
+              timestamp = respon['data_latest']['timestamp'];
+              tempDate = new DateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
+            }
+
+            if (respon['jadwal_pakan_flutter'] != null &&
+                respon['jadwal_pakan_flutter'] != "") {
+              globals.data =
+                  List<dynamic>.from((respon['jadwal_pakan_flutter']) as List);
+            }
+
+            if (respon['state_latest'] != null && respon['state_latest'] != "") {
+              globals.statePengisi =
+                  respon['state_latest']['pengisi_air'] == "1" ? true : false;
+              globals.stateC1 =
+                  respon['state_latest']['pembuang_c1'] == "1" ? true : false;
+              globals.stateC2 =
+                  respon['state_latest']['pembuang_c2'] == "1" ? true : false;
+              globals.stateLampu =
+                  respon['state_latest']['lampu'] == "1" ? true : false;
+            }
+          });
+        }
       }
     }
   }
@@ -126,220 +152,278 @@ class DashboardState extends State<Dashboard> {
             child: Container(
               width: MediaQuery.of(context).size.width - 50,
               padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-              child: Row(
+              child: Column(
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        "Suhu Ruangan ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Temperatur Air ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Tingkat PH Air ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Tingkat Kekeruhan ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Timestamp",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Tanggal ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        "Jam ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  Column(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Endpoint ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Response Code      ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          " : ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " : ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          globals.endpoint,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          "${globals.responseCode}",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                      ],
+                    ),
+                  ]),
+                  Container(height: 20),
+
+
+                  Row(
                     children: [
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        " :  ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        suhu_ruangan,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        suhu_air,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        ph_air,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        kekeruhan_air,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        DateFormat('dd MMM yyyy').format(tempDate),
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        DateFormat('hh:mm:ss').format(tempDate),
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        " °C",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " °C",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " pH",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        "   NTU",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        " ",
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                      Text(
-                        DateFormat('a').format(tempDate),
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: globals.valueColor),
-                      ),
-                    ],
-                  ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Suhu Ruangan ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Temperatur Air ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Tingkat PH Air ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Tingkat Kekeruhan ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Timestamp",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Tanggal ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          "Jam ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          " :  ",
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          suhu_ruangan,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          suhu_air,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          ph_air,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          kekeruhan_air,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          DateFormat('dd MMM yyyy').format(tempDate),
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          DateFormat('hh:mm:ss').format(tempDate),
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          " °C",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " °C",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " pH",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          "   NTU",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          " ",
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                        Text(
+                          DateFormat('a').format(tempDate),
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: globals.valueColor),
+                        ),
+                      ],
+                    ),
+                  ]),
                 ],
               ),
             ),
@@ -384,17 +468,17 @@ class DashboardState extends State<Dashboard> {
                 },
               ),
               ImageButton(
-                image: "assets/img/lamp_${globals.stateLampu ? "on" : "off"}_dark.png",
-                title: 'Lampu',
-                onTap:  () async {
+                  image:
+                      "assets/img/lamp_${globals.stateLampu ? "on" : "off"}_dark.png",
+                  title: 'Lampu',
+                  onTap: () async {
                     var url = Uri.parse(globals.endpoint_change_state);
                     final response = await http.post(url, body: {
                       'column': 'lampu',
                       'state': '${globals.stateLampu ? "0" : "1"}'
                     });
                     print(response.statusCode);
-                }
-              ),
+                  }),
             ],
           ),
         ],

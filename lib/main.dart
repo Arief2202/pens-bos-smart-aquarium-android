@@ -57,44 +57,69 @@ class _MyHomePageState extends State<MyHomePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? username = prefs.getString('username');
     final String? password = prefs.getString('password');
-
-    if (username != null && password != null) {
-      setState(() {
-        globals.loadingAutologin = true;
-      });
-      context.loaderOverlay.show();
-
-      if (username == globals.username && password == globals.password) {
+    final String? endpoint = prefs.getString('endpoint');
+    if (endpoint != null){
+      if (username != null && password != null) {
         setState(() {
-          globals.isLoggedIn = true;
+          globals.loadingAutologin = true;
         });
-      } else {
-        await prefs.remove('username');
-        await prefs.remove('password');
+        context.loaderOverlay.show();
+
+        if (username == globals.username && password == globals.password) {
+          setState(() {
+            globals.isLoggedIn = true;
+            globals.endpoint = endpoint!;
+          });
+        } else {
+          await prefs.remove('username');
+          await prefs.remove('password');
+          setState(() {
+            globals.isLoggedIn = false;
+          });
+          Alert(
+            context: context,
+            type: AlertType.info,
+            title: "Login Failed!",
+            desc: "Please relogin",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "OK",
+                  style: TextStyle(color: Colors.white, fontSize: 20),
+                ),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          ).show();
+        }
         setState(() {
-          globals.isLoggedIn = false;
+          globals.loadingAutologin = false;
         });
-        Alert(
-          context: context,
-          type: AlertType.info,
-          title: "Login Failed!",
-          desc: "Please relogin",
-          buttons: [
-            DialogButton(
-              child: Text(
-                "OK",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-              onPressed: () => Navigator.pop(context),
-            )
-          ],
-        ).show();
+        context.loaderOverlay.hide();
+        return;
       }
+    }
+    else{
+      await prefs.remove('username');
+      await prefs.remove('password');
       setState(() {
-        globals.loadingAutologin = false;
+        globals.isLoggedIn = false;
       });
-      context.loaderOverlay.hide();
-      return;
+      Alert(
+        context: context,
+        type: AlertType.info,
+        title: "Login Failed!",
+        desc: "Please Fill Endpoint",
+        buttons: [
+          DialogButton(
+            child: Text(
+              "OK",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () => Navigator.pop(context),
+          )
+        ],
+      ).show();
     }
   }
 
